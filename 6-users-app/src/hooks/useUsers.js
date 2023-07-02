@@ -1,6 +1,7 @@
 import { useReducer, useState } from "react";
 import { usersReducer } from "../reducers/usersReducer";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const initialUsers = [
   {
@@ -28,6 +29,8 @@ export const useUsers = () => {
   //Ocultar y mostrar formulario
   const [visibleForm, setVisibleForm] = useState(false);
 
+  const navigate = useNavigate();
+
   //Crear usuario
   const handlerAddUser = (user) => {
     const type = user.id === 0 ? "addUser" : "updateUser";
@@ -46,6 +49,7 @@ export const useUsers = () => {
     );
 
     handlerCloseForm();
+    navigate("/users");
   };
 
   //Eliminar Usuario

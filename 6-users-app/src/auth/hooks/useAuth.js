@@ -2,6 +2,7 @@ import { useReducer } from "react";
 import { loginReducer } from "../reducers/loginReducer";
 import Swal from "sweetalert2";
 import { loginUser } from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
 const initialLogin = JSON.parse(sessionStorage.getItem("login")) || {
   isAuth: false,
@@ -9,9 +10,11 @@ const initialLogin = JSON.parse(sessionStorage.getItem("login")) || {
 };
 export const useAuth = () => {
   const [login, dispatch] = useReducer(loginReducer, initialLogin);
+  //Uso de navigate para mostrar los users
+  const navigate = useNavigate();
 
   const handlerLogin = ({ username, password }) => {
-    const isLogin =loginUser({ username, password });
+    const isLogin = loginUser({ username, password });
     if (isLogin) {
       const user = { username: "admin" };
       dispatch({
@@ -26,6 +29,8 @@ export const useAuth = () => {
           user: user,
         })
       );
+      //Agregamos la ruta a redirigir
+      navigate("/users");
     } else {
       Swal.fire("Error Login", "Username o password invalidos", "error");
     }

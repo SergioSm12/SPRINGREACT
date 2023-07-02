@@ -37,6 +37,16 @@ export const UserForm = ({
       );
       return;
     }
+
+    //Validacion del 
+    if (!email.includes("@")) {
+      Swal.fire(
+        "Error de validacion Email",
+        "El email debe ser valido, incluir un @",
+        "error"
+      );
+      return;
+    }
     //Guardar el user form en el listado de usuarios.
     handlerAddUser(userForm);
     setUserForm(initialUserForm);
@@ -81,13 +91,16 @@ export const UserForm = ({
       <button className="btn btn-primary" type="submit">
         {id > 0 ? "Editar" : "Crear"}
       </button>
-      <button
-        className="btn btn-primary mx-2"
-        type="button"
-        onClick={() => onCloseForm()}
-      >
-        Cerrar
-      </button>
+
+      {!handlerCloseForm || (
+        <button
+          className="btn btn-primary mx-2"
+          type="button"
+          onClick={() => onCloseForm()}
+        >
+          Cerrar
+        </button>
+      )}
     </form>
   );
 };
