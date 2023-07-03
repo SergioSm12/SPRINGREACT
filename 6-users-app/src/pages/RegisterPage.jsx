@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { UserForm } from "../components/UserForm";
 import { useParams } from "react-router-dom";
+import { UserContext } from "../context/UserContext";
 
-export const RegisterPage = ({
-  handlerAddUser,
-  initialUserForm,
-  users = [],
-}) => {
+export const RegisterPage = () => {
+  //Traer datos del contexto
+  const { initialUserForm, users = [] } = useContext(UserContext);
   //Manejamos el userSeclected de otra forma
   const [userSelected, setUserSelected] = useState(initialUserForm);
 
@@ -24,11 +23,7 @@ export const RegisterPage = ({
       <h4>{userSelected.id > 0 ? "Editar" : "Registrar"} Usuario</h4>
       <div className="row">
         <div className="col">
-          <UserForm
-            userSelected={userSelected}
-            handlerAddUser={handlerAddUser}
-            initialUserForm={initialUserForm}
-          />
+          <UserForm userSelected={userSelected} />
         </div>
       </div>
     </div>
