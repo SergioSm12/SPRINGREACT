@@ -4,7 +4,7 @@ import { UserContext } from "../context/UserContext";
 
 export const UserForm = ({ userSelected, handlerCloseForm }) => {
   //Taer datos del contexto
-  const { initialUserForm, handlerAddUser } = useContext(UserContext);
+  const { initialUserForm, handlerAddUser, errors } = useContext(UserContext);
   const [userForm, setUserForm] = useState(initialUserForm);
 
   const { id, username, password, email } = userForm;
@@ -27,6 +27,7 @@ export const UserForm = ({ userSelected, handlerCloseForm }) => {
 
   const onSubmit = (e) => {
     e.preventDefault();
+    /*
     if (!username || (!password && id === 0) || !email) {
       Swal.fire(
         "Error de validacion",
@@ -44,10 +45,9 @@ export const UserForm = ({ userSelected, handlerCloseForm }) => {
         "error"
       );
       return;
-    }
+    }*/
     //Guardar el user form en el listado de usuarios.
     handlerAddUser(userForm);
-    setUserForm(initialUserForm);
   };
 
   //Funcion para cerrar y limpiar los datos del formulario
@@ -64,6 +64,7 @@ export const UserForm = ({ userSelected, handlerCloseForm }) => {
         value={username}
         onChange={onInputChange}
       />
+      <p className="text-danger">{errors?.username}</p>
 
       {id > 0 || (
         <input
@@ -75,6 +76,7 @@ export const UserForm = ({ userSelected, handlerCloseForm }) => {
           onChange={onInputChange}
         />
       )}
+      <p className="text-danger">{errors?.password}</p>
 
       <input
         className="form-control my-3 w-75"
@@ -83,6 +85,7 @@ export const UserForm = ({ userSelected, handlerCloseForm }) => {
         value={email}
         onChange={onInputChange}
       />
+      <p className="text-danger">{errors?.email}</p>
 
       <input type="hidden" name="id" value={id} />
 

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.sergio.backend.usersapp.backendusersapp.models.entities.User;
+import com.sergio.backend.usersapp.backendusersapp.models.request.UserRequest;
 
 public interface IUserService {
 
@@ -13,7 +14,7 @@ public interface IUserService {
 
     User save(User user);
 
-    Optional<User> update(User user, Long id);
+    Optional<User> update(UserRequest user, Long id);
 
     void remove(Long id);
 }
