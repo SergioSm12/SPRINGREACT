@@ -3,7 +3,10 @@ package com.sergio.backend.usersapp.backendusersapp.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.sergio.backend.usersapp.backendusersapp.models.dto.UserDto;
+import com.sergio.backend.usersapp.backendusersapp.models.dto.mapper.DtoMapperUser;
 import com.sergio.backend.usersapp.backendusersapp.models.entities.Role;
 import com.sergio.backend.usersapp.backendusersapp.models.request.UserRequest;
 import com.sergio.backend.usersapp.backendusersapp.repositories.IRoleRepository;
@@ -31,19 +34,26 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<User> findAll() {
-        return (List<User>) repository.findAll();
+    public List<UserDto> findAll() {
+
+        List<User> users = (List<User>) repository.findAll();
+        return users
+                .stream()
+                .map(u -> DtoMapperUser.builder()
+                        .setUser(u)
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<User> findById(Long id) {
-        return repository.findById(id);
+    public Optional<UserDto> findById(Long id) {
+        return repository.findById(id).map(u -> DtoMapperUser.builder().setUser(u).build());
     }
 
     @Override
     @Transactional
-    public User save(User user) {
+    public UserDto save(User user) {
         String passwordBCrypt = passwordEncoder.encode(user.getPassword());
         user.setPassword(passwordBCrypt);
 
@@ -56,21 +66,21 @@ public class UserService implements IUserService {
 
         user.setRoles(roles);
 
-        return repository.save(user);
+        return DtoMapperUser.builder().setUser(repository.save(user)).build();
     }
 
     @Override
     @Transactional
-    public Optional<User> update(UserRequest user, Long id) {
-        Optional<User> o = this.findById(id);
-
+    public Optional<UserDto> update(UserRequest user, Long id) {
+        Optional<User> o = repository.findById(id);
+        User userOptional = null;
         if (o.isPresent()) {
             User userDb = o.orElseThrow();
             userDb.setUsername(user.getUsername());
             userDb.setEmail(user.getEmail());
-            return Optional.of(this.save(userDb));
+            userOptional = repository.save(userDb);
         }
-        return Optional.empty();
+        return Optional.ofNullable(DtoMapperUser.builder().setUser(userOptional).build());
     }
 
     @Override

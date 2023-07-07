@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.sergio.backend.usersapp.backendusersapp.models.dto.UserDto;
 import com.sergio.backend.usersapp.backendusersapp.models.request.UserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,13 +35,13 @@ public class UserController {
     private IUserService service;
 
     @GetMapping
-    public List<User> list() {
+    public List<UserDto> list() {
         return service.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-        Optional<User> userOptional = service.findById(id);
+        Optional<UserDto> userOptional = service.findById(id);
 
         if (userOptional.isPresent()) {
             return ResponseEntity.ok(userOptional.orElseThrow());
@@ -62,7 +63,7 @@ public class UserController {
         if (result.hasErrors()) {
             return validation(result);
         }
-        Optional<User> o = service.update(user, id);
+        Optional<UserDto> o = service.update(user, id);
 
         if (o.isPresent()) {
 
@@ -73,7 +74,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> remove(@PathVariable Long id) {
-        Optional<User> o = service.findById(id);
+        Optional<UserDto> o = service.findById(id);
         if (o.isPresent()) {
             service.remove(id);
             return ResponseEntity.noContent().build();
