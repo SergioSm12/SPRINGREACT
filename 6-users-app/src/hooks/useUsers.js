@@ -1,8 +1,9 @@
-import { useReducer, useState } from "react";
+import { useContext, useReducer, useState } from "react";
 import { usersReducer } from "../reducers/usersReducer";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { findAll, remove, save, update } from "../services/userService";
+import { AuthContext } from "../auth/context/AuthContext";
 
 const initialUsers = [];
 
@@ -34,6 +35,8 @@ export const useUsers = () => {
 
   const navigate = useNavigate();
 
+  const { login, handlerLogout } = useContext(AuthContext);
+
   const getUsers = async () => {
     const result = await findAll();
     console.log(result);
@@ -48,6 +51,7 @@ export const useUsers = () => {
     const type = user.id === 0 ? "addUser" : "updateUser";
 
     //Crear y actualizar desde el backend
+    if (!login.isAdmin) return;
     let response;
 
     try {
@@ -77,7 +81,7 @@ export const useUsers = () => {
     } catch (error) {
       if (error.response && error.response.status == 400) {
         setErrors(error.response.data);
-      } 
+      }
       //Validacion para los uniques
       else if (
         error.response &&
@@ -93,6 +97,8 @@ export const useUsers = () => {
         if (error.response.data?.message?.includes(UK_email)) {
           setErrors({ email: "El email ya existe." });
         }
+      } else if (error.response?.status == 401) {
+        handlerLogout();
       } else {
         throw error;
       }
@@ -101,6 +107,7 @@ export const useUsers = () => {
 
   //Eliminar Usuario
   const handlerRemoveUser = (id) => {
+    if (!login.isAdmin) return;
     Swal.fire({
       title: "Esta seguro que desea eliminar?",
       text: "Cuidado el usuario sera eliminado ",
@@ -109,20 +116,26 @@ export const useUsers = () => {
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Si, eliminar!",
-    }).then((result) => {
+    }).then( async(result) => {
       if (result.isConfirmed) {
-        //Eliminar desde el backend
-        remove(id);
-        dispatch({
-          type: "removeUser",
-          payload: id,
-        });
+        try {
+          //Eliminar desde el backend
+          await remove(id);
+          dispatch({
+            type: "removeUser",
+            payload: id,
+          });
 
-        Swal.fire(
-          "Usuario Eliminado!",
-          "El usuario ha sido eliminado con exito",
-          "success"
-        );
+          Swal.fire(
+            "Usuario Eliminado!",
+            "El usuario ha sido eliminado con exito",
+            "success"
+          );
+        } catch (error) {
+          if (error.response?.status == 401) {
+            handlerLogout();
+          }
+        }
       }
     });
   };
