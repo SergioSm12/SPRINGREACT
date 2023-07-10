@@ -12,6 +12,7 @@ const initialUserForm = {
   username: "",
   password: "",
   email: "",
+  admin: false,
 };
 
 const initialErrors = {
@@ -38,12 +39,18 @@ export const useUsers = () => {
   const { login, handlerLogout } = useContext(AuthContext);
 
   const getUsers = async () => {
-    const result = await findAll();
-    console.log(result);
-    dispatch({
-      type: "loadingUsers",
-      payload: result.data,
-    });
+    try {
+      const result = await findAll();
+      //console.log(result);
+      dispatch({
+        type: "loadingUsers",
+        payload: result.data,
+      });
+    } catch (error) {
+      if (error.response?.status == 401) {
+        handlerLogout();
+      }
+    }
   };
 
   //Crear usuario
@@ -116,7 +123,7 @@ export const useUsers = () => {
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Si, eliminar!",
-    }).then( async(result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           //Eliminar desde el backend

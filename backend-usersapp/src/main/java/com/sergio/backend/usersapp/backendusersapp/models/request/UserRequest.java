@@ -1,11 +1,12 @@
 package com.sergio.backend.usersapp.backendusersapp.models.request;
 
+import com.sergio.backend.usersapp.backendusersapp.models.IUser;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class UserRequest {
+public class UserRequest implements IUser {
     @NotBlank
     @Size(min = 4, max = 8)
     private String username;
@@ -13,6 +14,8 @@ public class UserRequest {
     @Email
     @NotBlank
     private String email;
+    private boolean admin;
+
 
     public String getUsername() {
         return username;
@@ -30,4 +33,12 @@ public class UserRequest {
         this.email = email;
     }
 
+    @Override
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
 }

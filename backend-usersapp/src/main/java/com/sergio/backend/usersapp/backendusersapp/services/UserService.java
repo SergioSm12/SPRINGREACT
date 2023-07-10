@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.sergio.backend.usersapp.backendusersapp.models.IUser;
 import com.sergio.backend.usersapp.backendusersapp.models.dto.UserDto;
 import com.sergio.backend.usersapp.backendusersapp.models.dto.mapper.DtoMapperUser;
 import com.sergio.backend.usersapp.backendusersapp.models.entities.Role;
@@ -57,14 +58,7 @@ public class UserService implements IUserService {
         String passwordBCrypt = passwordEncoder.encode(user.getPassword());
         user.setPassword(passwordBCrypt);
 
-        //Crear role user por defecto
-        Optional<Role> o = roleRepository.findByName("ROLE_USER");
-        List<Role> roles = new ArrayList<>();
-        if (o.isPresent()) {
-            roles.add(o.orElseThrow());
-        }
-
-        user.setRoles(roles);
+        user.setRoles(getRoles(user));
 
         return DtoMapperUser.builder().setUser(repository.save(user)).build();
     }
@@ -75,7 +69,9 @@ public class UserService implements IUserService {
         Optional<User> o = repository.findById(id);
         User userOptional = null;
         if (o.isPresent()) {
+
             User userDb = o.orElseThrow();
+            userDb.setRoles(getRoles(user));
             userDb.setUsername(user.getUsername());
             userDb.setEmail(user.getEmail());
             userOptional = repository.save(userDb);
@@ -87,6 +83,23 @@ public class UserService implements IUserService {
     @Transactional
     public void remove(Long id) {
         repository.deleteById(id);
+    }
+
+    private List<Role> getRoles(IUser user) {
+        //Crear role user por defecto
+        Optional<Role> ou = roleRepository.findByName("ROLE_USER");
+        List<Role> roles = new ArrayList<>();
+        if (ou.isPresent()) {
+            roles.add(ou.orElseThrow());
+        }
+
+        if (user.isAdmin()) {
+            Optional<Role> oa = roleRepository.findByName("ROLE_ADMIN");
+            if (oa.isPresent()) {
+                roles.add(oa.orElseThrow());
+            }
+        }
+        return roles;
     }
 
 }
