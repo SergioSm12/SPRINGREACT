@@ -1,51 +1,44 @@
-import { useContext, useReducer, useState } from "react";
-import { usersReducer } from "../reducers/usersReducer";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { findAll, remove, save, update } from "../services/userService";
-import { AuthContext } from "../auth/context/AuthContext";
-
-const initialUsers = [];
-
-const initialUserForm = {
-  id: 0,
-  username: "",
-  password: "",
-  email: "",
-  admin: false,
-};
-
-const initialErrors = {
-  username: "",
-  password: "",
-  email: "",
-};
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addUser,
+  removeUser,
+  updateUser,
+  loadingUsers,
+  onUserSelectedForm,
+  onOpenForm,
+  onCloseForm,
+  initialUserForm,
+  loadingError,
+} from "../store/slices/users/usersSlice";
+import { useAuth } from "../auth/hooks/useAuth";
 
 export const useUsers = () => {
   //Uso de reducers
-  const [users, dispatch] = useReducer(usersReducer, initialUsers);
+  //const [users, dispatch] = useReducer(usersReducer, initialUsers);
+
+  const { users, userSelected, visibleForm, errors } = useSelector(
+    (state) => state.users
+  );
+  const dispatch = useDispatch();
 
   //Usuario seleccionado para update
-  const [userSelected, setUserSelected] = useState(initialUserForm);
+  // const [userSelected, setUserSelected] = useState(initialUserForm);
 
   //Ocultar y mostrar formulario
-  const [visibleForm, setVisibleForm] = useState(false);
-
-  //Estado para manejar errors
-  const [errors, setErrors] = useState(initialErrors);
+  //const [visibleForm, setVisibleForm] = useState(false);
 
   const navigate = useNavigate();
 
-  const { login, handlerLogout } = useContext(AuthContext);
+  const { login, handlerLogout } = useAuth();
 
   const getUsers = async () => {
     try {
       const result = await findAll();
       //console.log(result);
-      dispatch({
-        type: "loadingUsers",
-        payload: result.data,
-      });
+      dispatch(loadingUsers(result.data));
     } catch (error) {
       if (error.response?.status == 401) {
         handlerLogout();
@@ -65,15 +58,12 @@ export const useUsers = () => {
       if (user.id === 0) {
         //Guardar desde el back end
         response = await save(user);
+        dispatch(addUser(response.data));
       } else {
         //Actualizar desde el backend
         response = await update(user);
+        dispatch(updateUser(response.data));
       }
-
-      dispatch({
-        type: type,
-        payload: response.data,
-      });
 
       Swal.fire(
         user.id === 0 ? "Usuario Creado" : "Usuario Actualizado",
@@ -87,7 +77,7 @@ export const useUsers = () => {
       navigate("/users");
     } catch (error) {
       if (error.response && error.response.status == 400) {
-        setErrors(error.response.data);
+        dispatch(loadingError(error.response.data));
       }
       //Validacion para los uniques
       else if (
@@ -99,10 +89,10 @@ export const useUsers = () => {
         const UK_username = "UK_r43af9ap4edm43mmtq01oddj6";
         const UK_email = "UK_6dotkott2kjsp8vw4d0m25fb7";
         if (error.response.data?.message?.includes(UK_username)) {
-          setErrors({ username: "El username ya existe." });
+          dispatch(loadingError({ username: "El username ya existe." }));
         }
         if (error.response.data?.message?.includes(UK_email)) {
-          setErrors({ email: "El email ya existe." });
+          dispatch(loadingError({ email: "El email ya existe." }));
         }
       } else if (error.response?.status == 401) {
         handlerLogout();
@@ -128,10 +118,8 @@ export const useUsers = () => {
         try {
           //Eliminar desde el backend
           await remove(id);
-          dispatch({
-            type: "removeUser",
-            payload: id,
-          });
+
+          dispatch(removeUser(id));
 
           Swal.fire(
             "Usuario Eliminado!",
@@ -150,19 +138,22 @@ export const useUsers = () => {
   //Funcion para seleccionar user update
   const handlerUserSelectedForm = (user) => {
     //Agregamos el objeto seleccionado al estado userSelected
-    setVisibleForm(true);
-    setUserSelected({ ...user });
+    //setVisibleForm(true);
+    //setUserSelected({ ...user });
+    dispatch(onUserSelectedForm({ ...user }));
   };
 
   //mostrar formulario
   const handlerOpenForm = () => {
-    setVisibleForm(true);
+    //setVisibleForm(true);
+    dispatch(onOpenForm());
   };
   //Ocultar formulario
   const handlerCloseForm = () => {
-    setVisibleForm(false);
-    setUserSelected(initialUserForm);
-    setErrors({});
+    //setVisibleForm(false);
+    //setUserSelected(initialUserForm);
+    dispatch(onCloseForm());
+    dispatch(loadingError({}));
   };
 
   return {

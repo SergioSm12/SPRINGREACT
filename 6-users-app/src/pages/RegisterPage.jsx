@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserForm } from "../components/UserForm";
 import { useParams } from "react-router-dom";
-import { UserContext } from "../context/UserContext";
+import { useUsers } from "../hooks/useUsers";
 
 export const RegisterPage = () => {
   //Traer datos del contexto
-  const { initialUserForm, users = [] } = useContext(UserContext);
+  const { initialUserForm, users = [] } = useUsers();
   //Manejamos el userSeclected de otra forma
   const [userSelected, setUserSelected] = useState(initialUserForm);
 

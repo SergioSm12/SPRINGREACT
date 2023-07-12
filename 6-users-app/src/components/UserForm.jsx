@@ -1,10 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
-import Swal from "sweetalert2";
-import { UserContext } from "../context/UserContext";
+import { useUsers } from "../hooks/useUsers";
 
 export const UserForm = ({ userSelected, handlerCloseForm }) => {
   //Taer datos del contexto
-  const { initialUserForm, handlerAddUser, errors } = useContext(UserContext);
+  const { initialUserForm, handlerAddUser, errors } = useUsers();
   const [userForm, setUserForm] = useState(initialUserForm);
   const [checked, setChecked] = useState(userForm.admin);
 
