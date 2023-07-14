@@ -3,16 +3,37 @@ import { UserModalForm } from "../components/UserModalForm";
 import { UsersList } from "../components/UsersList";
 import { useUsers } from "../hooks/useUsers";
 import { useAuth } from "../auth/hooks/useAuth";
+import { useParams } from "react-router-dom";
+import { Paginator } from "../components/paginator";
 
 export const UsersPage = () => {
-  const { users, visibleForm, handlerOpenForm, getUsers } =
-  useUsers();
+  //Traer la pagina de la ruta
+  const { page } = useParams();
+
+  const {
+    users,
+    visibleForm,
+    isLoading,
+    paginator,
+    handlerOpenForm,
+    getUsers,
+  } = useUsers();
 
   const { login } = useAuth();
 
   useEffect(() => {
-    getUsers();
-  }, []);
+    getUsers(page);
+  }, [, page]);
+
+  if (isLoading) {
+    return (
+      <div className="container my-4 text-center">
+        <div className="spinner-border text-info" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
   return (
     <>
       {!visibleForm || <UserModalForm />}
@@ -21,7 +42,7 @@ export const UsersPage = () => {
         <h2>Users App</h2>
         <div className="row">
           <div className="col">
-            {(visibleForm) || !login.isAdmin || (
+            {visibleForm || !login.isAdmin || (
               <button
                 className="btn btn-primary my-2"
                 onClick={handlerOpenForm}
@@ -35,7 +56,10 @@ export const UsersPage = () => {
                 No hay usuarios en el sistema!
               </div>
             ) : (
-              <UsersList />
+              <>
+                <UsersList />
+                <Paginator url="/users/page" paginator={paginator} />
+              </>
             )}
           </div>
         </div>

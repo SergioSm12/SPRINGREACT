@@ -6,6 +6,16 @@ import { useAuth } from "./auth/hooks/useAuth";
 
 export const AppRoutes = () => {
   const { login } = useAuth();
+
+  if (login.isloginLoading) {
+    return (
+      <div className="container my-4 text-center">
+        <div className="spinner-border text-secondary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
   return (
     <Routes>
       {login.isAuth ? (

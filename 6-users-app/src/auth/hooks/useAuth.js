@@ -2,17 +2,24 @@ import Swal from "sweetalert2";
 import { loginUser } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { onLogin, onLogout } from "../../store/slices/users/auth/authSlice";
+import {
+  onLogin,
+  onLogout,
+  onInitLogin,
+} from "../../store/slices/users/auth/authSlice";
 
 export const useAuth = () => {
   const dispatch = useDispatch();
-  const {user, isAdmin, isAuth}= useSelector(state=> state.auth)
+  const { user, isAdmin, isAuth, isloginLoading } = useSelector(
+    (state) => state.auth
+  );
   //const [login, dispatch] = useReducer(loginReducer, initialLogin);
   //Uso de navigate para mostrar los users
   const navigate = useNavigate();
 
   const handlerLogin = async ({ username, password }) => {
     try {
+      dispatch(onInitLogin());
       const response = await loginUser({ username, password });
       const token = response.data.token;
       const claims = JSON.parse(window.atob(token.split(".")[1]));
@@ -33,6 +40,7 @@ export const useAuth = () => {
       //Agregamos la ruta a redirigir
       navigate("/users");
     } catch (error) {
+      dispatch(onLogout());
       if (error.response?.status == 401) {
         Swal.fire("Error Login", "Username o password invalidos", "error");
       } else if (error.response?.status == 403) {
@@ -55,7 +63,7 @@ export const useAuth = () => {
     sessionStorage.clear();
   };
   return {
-    login: { user, isAdmin, isAuth },
+    login: { user, isAdmin, isAuth, isloginLoading },
     handlerLogin,
     handlerLogout,
   };

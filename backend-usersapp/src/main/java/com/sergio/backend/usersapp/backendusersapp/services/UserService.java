@@ -12,6 +12,8 @@ import com.sergio.backend.usersapp.backendusersapp.models.entities.Role;
 import com.sergio.backend.usersapp.backendusersapp.models.request.UserRequest;
 import com.sergio.backend.usersapp.backendusersapp.repositories.IRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +46,15 @@ public class UserService implements IUserService {
                         .setUser(u)
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    //Paginacion
+    @Transactional(readOnly = true)
+    @Override
+    public Page<UserDto> findAll(Pageable pageable) {
+
+        Page<User> usersPage = repository.findAll(pageable);
+        return usersPage.map(u -> DtoMapperUser.builder().setUser(u).build());
     }
 
     @Override
