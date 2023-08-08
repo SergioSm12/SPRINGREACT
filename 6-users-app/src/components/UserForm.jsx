@@ -60,6 +60,7 @@ export const UserForm = ({ userSelected, handlerCloseForm }) => {
     handlerCloseForm();
     setUserForm(initialUserForm);
   };
+  
   return (
     <form onSubmit={onSubmit}>
       <input
